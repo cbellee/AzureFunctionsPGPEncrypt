@@ -17,7 +17,7 @@ variables:
     vmImageName: 'windows-latest'
 
 stages:
-  - stage: BuildAzureFunctionsPGPEncrypt
+  - stage: Build
     displayName: 'Build AzureFunctionsPGPEncrypt'
   
     jobs:
