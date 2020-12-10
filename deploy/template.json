@@ -1,0 +1,1149 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "name": "create-share-group",
+            "location": "australiaeast",
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "create-share",
+                        "properties": {
+                            "image": "microsoft/azure-cli:latest",
+                            "command": [
+                                "az",
+                                "storage",
+                                "share",
+                                "create",
+                                "--name",
+                                "sftpfileshare"
+                            ],
+                            "ports": [],
+                            "environmentVariables": [
+                                {
+                                    "name": "AZURE_STORAGE_KEY",
+                                    "value": "3+4OnwpCpl/NmlfWsWxicmO0Lnj3+Qm2mDn7OTd5szoRKLLdBLAlas1PCKiSJGdUFLPkzubjTQh+g25L7a3zWg=="
+                                },
+                                {
+                                    "name": "AZURE_STORAGE_ACCOUNT",
+                                    "value": "sftpstg7aqfx74himsuc"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1,
+                                    "cpu": 1
+                                }
+                            }
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "OnFailure",
+                "osType": "Linux"
+            }
+        },
+        {
+            "type": "Microsoft.ContainerInstance/containerGroups",
+            "apiVersion": "2019-12-01",
+            "name": "sftp-group",
+            "location": "australiaeast",
+            "properties": {
+                "sku": "Standard",
+                "containers": [
+                    {
+                        "name": "sftp",
+                        "properties": {
+                            "image": "atmoz/sftp:latest",
+                            "ports": [
+                                {
+                                    "port": 22
+                                }
+                            ],
+                            "environmentVariables": [
+                                {
+                                    "name": "SFTP_USERS",
+                                    "value": "jaydoyle:B@N@N@:1001"
+                                }
+                            ],
+                            "resources": {
+                                "requests": {
+                                    "memoryInGB": 1,
+                                    "cpu": 2
+                                }
+                            },
+                            "volumeMounts": [
+                                {
+                                    "name": "sftpvolume",
+                                    "mountPath": "/home/jaydoyle/upload",
+                                    "readOnly": false
+                                }
+                            ]
+                        }
+                    }
+                ],
+                "initContainers": [],
+                "restartPolicy": "OnFailure",
+                "ipAddress": {
+                    "ports": [
+                        {
+                            "protocol": "TCP",
+                            "port": 22
+                        }
+                    ],
+                    "ip": "20.193.38.120",
+                    "type": "Public",
+                    "dnsNameLabel": "37sv3qsx7h7hw"
+                },
+                "osType": "Linux",
+                "volumes": [
+                    {
+                        "name": "sftpvolume",
+                        "azureFile": {
+                            "shareName": "sftpfileshare",
+                            "readOnly": false,
+                            "storageAccountName": "sftpstg7aqfx74himsuc"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "microsoft.insights/actionGroups",
+            "apiVersion": "2019-03-01",
+            "name": "Application Insights Smart Detection",
+            "location": "Global",
+            "properties": {
+                "groupShortName": "SmartDetect",
+                "enabled": true,
+                "emailReceivers": [],
+                "smsReceivers": [],
+                "webhookReceivers": [],
+                "itsmReceivers": [],
+                "azureAppPushReceivers": [],
+                "automationRunbookReceivers": [],
+                "voiceReceivers": [],
+                "logicAppReceivers": [],
+                "azureFunctionReceivers": []
+            }
+        },
+        {
+            "type": "microsoft.insights/components",
+            "apiVersion": "2018-05-01-preview",
+            "name": "PepperPOCFunctions",
+            "location": "australiaeast",
+            "kind": "web",
+            "properties": {
+                "Application_Type": "web",
+                "Flow_Type": "Redfield",
+                "Request_Source": "IbizaWebAppExtensionCreate",
+                "RetentionInDays": 90,
+                "publicNetworkAccessForIngestion": "Enabled",
+                "publicNetworkAccessForQuery": "Enabled"
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "pepperpoc-decrypt",
+            "location": "australiaeast",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {},
+                    "triggers": {},
+                    "actions": {},
+                    "outputs": {}
+                },
+                "parameters": {}
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage",
+            "location": "australiaeast",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "minimumTlsVersion": "TLS1_2",
+                "allowBlobPublicAccess": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Hot"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2020-08-01-preview",
+            "name": "sftpstg7aqfx74himsuc",
+            "location": "australiaeast",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "Storage",
+            "properties": {
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": false,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "azureblob",
+            "location": "australiaeast",
+            "kind": "V1",
+            "properties": {
+                "displayName": "pepperpocstorageconnection",
+                "customParameterValues": {},
+                "api": {
+                    "id": "/subscriptions/e90daec2-39dd-429f-8ce6-51283e7737a6/providers/Microsoft.Web/locations/australiaeast/managedApis/azureblob"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "sftpwithssh-18",
+            "location": "australiaeast",
+            "kind": "V1",
+            "properties": {
+                "displayName": "FTP-Monday",
+                "customParameterValues": {},
+                "api": {
+                    "id": "/subscriptions/e90daec2-39dd-429f-8ce6-51283e7737a6/providers/Microsoft.Web/locations/australiaeast/managedApis/sftpwithssh"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/connections",
+            "apiVersion": "2016-06-01",
+            "name": "sftpwithssh-19",
+            "location": "australiaeast",
+            "kind": "V1",
+            "properties": {
+                "displayName": "testconnection",
+                "customParameterValues": {},
+                "api": {
+                    "id": "/subscriptions/e90daec2-39dd-429f-8ce6-51283e7737a6/providers/Microsoft.Web/locations/australiaeast/managedApis/sftpwithssh"
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/serverfarms",
+            "apiVersion": "2018-02-01",
+            "name": "ASP-rgpepperpoc-b750",
+            "location": "Australia East",
+            "sku": {
+                "name": "Y1",
+                "tier": "Dynamic",
+                "size": "Y1",
+                "family": "Y",
+                "capacity": 0
+            },
+            "kind": "functionapp",
+            "properties": {
+                "perSiteScaling": false,
+                "maximumElasticWorkerCount": 1,
+                "isSpot": false,
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "targetWorkerCount": 0,
+                "targetWorkerSizeId": 0
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "changeFeed": {
+                    "enabled": true
+                },
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": true,
+                    "days": 7
+                },
+                "isVersioningEnabled": true
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "sftpstg7aqfx74himsuc/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'sftpstg7aqfx74himsuc')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                },
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "sftpstg7aqfx74himsuc/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'sftpstg7aqfx74himsuc')]"
+            ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "properties": {
+                "protocolSettings": {
+                    "smb": {}
+                },
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/queueServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "sftpstg7aqfx74himsuc/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'sftpstg7aqfx74himsuc')]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/tableServices",
+            "apiVersion": "2020-08-01-preview",
+            "name": "sftpstg7aqfx74himsuc/default",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', 'sftpstg7aqfx74himsuc')]"
+            ],
+            "properties": {
+                "cors": {
+                    "corsRules": []
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/serverfarms', 'ASP-rgpepperpoc-b750')]"
+            ],
+            "kind": "functionapp",
+            "properties": {
+                "enabled": true,
+                "hostNameSslStates": [
+                    {
+                        "name": "pepperpocfunctions.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Standard"
+                    },
+                    {
+                        "name": "pepperpocfunctions.scm.azurewebsites.net",
+                        "sslState": "Disabled",
+                        "hostType": "Repository"
+                    }
+                ],
+                "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'ASP-rgpepperpoc-b750')]",
+                "reserved": false,
+                "isXenon": false,
+                "hyperV": false,
+                "siteConfig": {},
+                "scmSiteAlsoStopped": false,
+                "clientAffinityEnabled": true,
+                "clientCertEnabled": false,
+                "hostNamesDisabled": false,
+                "containerSize": 1536,
+                "dailyMemoryTimeQuota": 0,
+                "httpsOnly": false,
+                "redundancyMode": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/config",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/web",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "numberOfWorkers": -1,
+                "defaultDocuments": [
+                    "Default.htm",
+                    "Default.html",
+                    "Default.asp",
+                    "index.htm",
+                    "index.html",
+                    "iisstart.htm",
+                    "default.aspx",
+                    "index.php"
+                ],
+                "netFrameworkVersion": "v4.0",
+                "phpVersion": "5.6",
+                "requestTracingEnabled": false,
+                "remoteDebuggingEnabled": false,
+                "remoteDebuggingVersion": "VS2019",
+                "httpLoggingEnabled": false,
+                "logsDirectorySizeLimit": 35,
+                "detailedErrorLoggingEnabled": false,
+                "publishingUsername": "$PepperPOCFunctions",
+                "azureStorageAccounts": {},
+                "scmType": "None",
+                "use32BitWorkerProcess": true,
+                "webSocketsEnabled": false,
+                "alwaysOn": false,
+                "managedPipelineMode": "Integrated",
+                "virtualApplications": [
+                    {
+                        "virtualPath": "/",
+                        "physicalPath": "site\\wwwroot",
+                        "preloadEnabled": false
+                    }
+                ],
+                "loadBalancing": "LeastRequests",
+                "experiments": {
+                    "rampUpRules": []
+                },
+                "autoHealEnabled": false,
+                "cors": {
+                    "allowedOrigins": [
+                        "https://functions.azure.com",
+                        "https://functions-staging.azure.com",
+                        "https://functions-next.azure.com"
+                    ],
+                    "supportCredentials": false
+                },
+                "localMySqlEnabled": false,
+                "ipSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictions": [
+                    {
+                        "ipAddress": "Any",
+                        "action": "Allow",
+                        "priority": 1,
+                        "name": "Allow all",
+                        "description": "Allow all access"
+                    }
+                ],
+                "scmIpSecurityRestrictionsUseMain": false,
+                "http20Enabled": false,
+                "minTlsVersion": "1.2",
+                "ftpsState": "AllAllowed",
+                "reservedInstanceCount": 0
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/1f7907f76db34888b4aafca9fc91daf4",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T04:59:21.6746897Z",
+                "end_time": "2020-11-20T04:59:31.1321544Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/58949d5a554a4fe09b53a6db66363226",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T02:47:49.7086485Z",
+                "end_time": "2020-11-20T02:47:57.9198062Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/6611382f54134140b5b4ecf7c02b4854",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T03:42:03.9111394Z",
+                "end_time": "2020-11-20T03:42:15.0104978Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/945d13c9fe794c1eab7a7d0181be886f",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T05:11:56.228589Z",
+                "end_time": "2020-11-20T05:12:05.507391Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/a05de3ce0cb543c6a3f1a2c3f9812ffd",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "N/A",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T05:15:41.647667Z",
+                "end_time": "2020-11-20T05:15:49.5692338Z",
+                "active": true
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/a9271d2423ec4f228fb304b6d5505f77",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T03:10:59.4429378Z",
+                "end_time": "2020-11-20T03:11:08.2759358Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/b87a2f70fa41498fad8f8a6a35966588",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T03:00:41.8408204Z",
+                "end_time": "2020-11-20T03:00:50.2942397Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/be90d0c2e23c46db90301321c95153b0",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T02:40:48.3358794Z",
+                "end_time": "2020-11-20T02:40:56.3356833Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/c58b27b9934041209c8fad5b714237c7",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T04:08:51.285918Z",
+                "end_time": "2020-11-20T04:08:58.4580427Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/deployments",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/f743a5c63323465e9a326dffe90328a5",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "status": 4,
+                "author_email": "N/A",
+                "author": "VS Code",
+                "deployer": "ZipDeploy",
+                "message": "Created via a push deployment",
+                "start_time": "2020-11-20T04:12:24.8079554Z",
+                "end_time": "2020-11-20T04:12:32.2755713Z",
+                "active": false
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/PGPDecrypt",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://pepperpocfunctions.azurewebsites.net/admin/vfs/site/wwwroot/PGPDecrypt/",
+                "script_href": "https://pepperpocfunctions.azurewebsites.net/admin/vfs/site/wwwroot/bin/AzureFunctionsPGPEncrypt.dll",
+                "config_href": "https://pepperpocfunctions.azurewebsites.net/admin/vfs/site/wwwroot/PGPDecrypt/function.json",
+                "href": "https://pepperpocfunctions.azurewebsites.net/admin/functions/PGPDecrypt",
+                "config": {},
+                "test_data": "{\"method\":\"post\",\"queryStringParams\":[],\"headers\":[],\"body\":\"{\\n  \\\"body\\\": \\\"hQIMAxdTnKAfmwX0AQ/8CFYTM8W1S57kMvRPsOZGIwFT5bGjrJ3UAvlBxCGL3C2B\\nofrIPXUUW5KP+Zxita9EHvbHkvjLO6CM363sBRx8RQfBSM6XFMSpkxdFs9qoVzed\\nKMgQyVw5JVqIQWS9YwM6JyoDVyIV8J2r5oItKtHBL92LTFTiJ3uxaZyax6vhHW9f\\nwEID6n0Uo9Kxe/aQtzVkK2bSqpRP8ABlPG/oiw6IJMYn4Mv24+bZa2PRi6/2qr7u\\nJdEblxIadzcGmnoqq0jHIEM9DJMWAeOCctX/Cw90ixTC6PWQATfx3tOEAdhqNLqQ\\nbnyvw7YAV/FycvcEijWHlKMHtyeI3WSVf9vSUIbsX7FWKm9iTppFcf3/RMxl3PC8\\n3XXmDaZOFt2By/Fe0ATKgm3T9PlOKmbaa1RG49QboKvDdOYQHycymX9JZurdPrwl\\nzF6z48iE869zX62ggYkJSI9FyfcJTSwKw8FG1KmX3glb23bNI3nPc8iZYNbOZYad\\ntL756F35p1g/ophc/GF1wUFNirAMR8+XlG9lDyac7xqBH/AoYjCE3IsiRMNo9TNP\\nkBjnNLozhnwkxw/7/aBZaVc0lOjAU4FSQAHc6WAompZ/S/WRAPEBL3tIc1Z49GaC\\nzHCGUdnkKxKeLoNQGV1CIgk9/LQfaODpGCVdALPbJmHa5vJIC/J5f1lcmvYqEUnS\\nSgFNjsaknFoSnHpe7L/9+x9pCgdiSViNlbnrACMLHR7q3zeFvCTQ1+oHpGHzwzBh\\n5vFcsTUh6YOP2Gj3fOqlS5cEAtVGFQmaLBOH\\n=P4DH\\\"\\n}\"}"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/functions",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/PGPEncrypt",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "script_root_path_href": "https://pepperpocfunctions.azurewebsites.net/admin/vfs/site/wwwroot/PGPEncrypt/",
+                "script_href": "https://pepperpocfunctions.azurewebsites.net/admin/vfs/site/wwwroot/bin/AzureFunctionsPGPEncrypt.dll",
+                "config_href": "https://pepperpocfunctions.azurewebsites.net/admin/vfs/site/wwwroot/PGPEncrypt/function.json",
+                "href": "https://pepperpocfunctions.azurewebsites.net/admin/functions/PGPEncrypt",
+                "config": {},
+                "test_data": "{\"method\":\"post\",\"queryStringParams\":[],\"headers\":[],\"body\":\"{\\n  \\\"body\\\": \\\"TestPlaintext\\\"\\n}\"}"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites/hostNameBindings",
+            "apiVersion": "2018-11-01",
+            "name": "PepperPOCFunctions/pepperpocfunctions.azurewebsites.net",
+            "location": "Australia East",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites', 'PepperPOCFunctions')]"
+            ],
+            "properties": {
+                "siteName": "PepperPOCFunctions",
+                "hostNameType": "Verified"
+            }
+        },
+        {
+            "type": "microsoft.alertsmanagement/smartdetectoralertrules",
+            "apiVersion": "2019-06-01",
+            "name": "failure anomalies - pepperpocfunctions",
+            "location": "global",
+            "dependsOn": [
+                "[resourceId('microsoft.insights/components', 'PepperPOCFunctions')]",
+                "[resourceId('microsoft.insights/actionGroups', 'Application Insights Smart Detection')]"
+            ],
+            "properties": {
+                "description": "Failure Anomalies notifies you of an unusual rise in the rate of failed HTTP requests or dependency calls.",
+                "state": "Enabled",
+                "severity": "Sev3",
+                "frequency": "PT1M",
+                "detector": {
+                    "id": "FailureAnomaliesDetector",
+                    "name": "Failure Anomalies",
+                    "description": "Detects if your application experiences an abnormal rise in the rate of HTTP requests or dependency calls that are reported as failed. The anomaly detection uses machine learning algorithms and occurs in near real time, therefore there's no need to define a frequency for this signal.<br/></br/>To help you triage and diagnose the problem, an analysis of the characteristics of the failures and related telemetry is provided with the detection. This feature works for any app, hosted in the cloud or on your own servers, that generates request or dependency telemetry - for example, if you have a worker role that calls <a class=\"ext-smartDetecor-link\" href=\\\"https://docs.microsoft.com/azure/application-insights/app-insights-api-custom-events-metrics#trackrequest\\\" target=\\\"_blank\\\">TrackRequest()</a> or <a class=\"ext-smartDetecor-link\" href=\\\"https://docs.microsoft.com/azure/application-insights/app-insights-api-custom-events-metrics#trackdependency\\\" target=\\\"_blank\\\">TrackDependency()</a>.<br/><br/><a class=\"ext-smartDetecor-link\" href=\\\"https://docs.microsoft.com/azure/azure-monitor/app/proactive-failure-diagnostics\\\" target=\\\"_blank\\\">Learn more about Failure Anomalies</a>",
+                    "supportedResourceTypes": [
+                        "ApplicationInsights"
+                    ]
+                },
+                "scope": [
+                    "[resourceId('microsoft.insights/components', 'PepperPOCFunctions')]"
+                ],
+                "actionGroups": {
+                    "groupIds": [
+                        "[resourceId('microsoft.insights/actionGroups', 'Application Insights Smart Detection')]"
+                    ]
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default/azure-webjobs-hosts",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', 'pepperpocstorage', 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default/azure-webjobs-secrets",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', 'pepperpocstorage', 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default/destination",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', 'pepperpocstorage', 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default/source",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/blobServices', 'pepperpocstorage', 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "defaultEncryptionScope": "$account-encryption-key",
+                "denyEncryptionScopeOverride": false,
+                "publicAccess": "None"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2020-08-01-preview",
+            "name": "pepperpocstorage/default/pepperpocfunctions927e",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', 'pepperpocstorage', 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', 'pepperpocstorage')]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": 5120,
+                "enabledProtocols": "SMB"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts/fileServices/shares",
+            "apiVersion": "2020-08-01-preview",
+            "name": "sftpstg7aqfx74himsuc/default/sftpfileshare",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts/fileServices', 'sftpstg7aqfx74himsuc', 'default')]",
+                "[resourceId('Microsoft.Storage/storageAccounts', 'sftpstg7aqfx74himsuc')]"
+            ],
+            "properties": {
+                "accessTier": "TransactionOptimized",
+                "shareQuota": 5120,
+                "enabledProtocols": "SMB"
+            }
+        },
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "pepperpoc-logicapp",
+            "location": "australiaeast",
+            "dependsOn": [
+                "[resourceId('Microsoft.Web/sites/functions', 'PepperPOCFunctions', 'PGPEncrypt')]",
+                "[resourceId('Microsoft.Web/connections', 'azureblob')]",
+                "[resourceId('Microsoft.Web/connections', 'sftpwithssh-19')]"
+            ],
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "$connections": {
+                            "defaultValue": {},
+                            "type": "Object"
+                        }
+                    },
+                    "triggers": {
+                        "When_a_blob_is_added_or_modified_(properties_only)": {
+                            "recurrence": {
+                                "frequency": "Minute",
+                                "interval": 1
+                            },
+                            "splitOn": "@triggerBody()",
+                            "metadata": {
+                                "JTJmc291cmNl": "/source"
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/datasets/default/triggers/batch/onupdatedfile",
+                                "queries": {
+                                    "folderId": "JTJmc291cmNl",
+                                    "maxFileCount": 1
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "Create_Encrypted_file_in_blob_storage": {
+                            "runAfter": {
+                                "Set_encrypted_content_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": "@variables('blobEncrypted')",
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/datasets/default/files",
+                                "queries": {
+                                    "folderPath": "/destination/",
+                                    "name": "blobencrypted@{triggerBody()?['Name']}",
+                                    "queryParametersSingleEncoded": true
+                                }
+                            },
+                            "runtimeConfiguration": {
+                                "contentTransfer": {
+                                    "transferMode": "Chunked"
+                                }
+                            }
+                        },
+                        "Create_file": {
+                            "runAfter": {
+                                "Get_encrypted_file": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "body": "@body('Get_encrypted_file')",
+                                "headers": {
+                                    "ReadFileMetadataFromServer": true
+                                },
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['sftpwithssh_3']['connectionId']"
+                                    }
+                                },
+                                "method": "post",
+                                "path": "/datasets/default/files",
+                                "queries": {
+                                    "folderPath": "/upload/Uploads",
+                                    "name": "@body('Create_Encrypted_file_in_blob_storage')?['Name']",
+                                    "queryParametersSingleEncoded": true
+                                }
+                            },
+                            "runtimeConfiguration": {
+                                "contentTransfer": {
+                                    "transferMode": "Chunked"
+                                }
+                            }
+                        },
+                        "Get_blob_content": {
+                            "runAfter": {
+                                "Initialize_new_blob_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent('/source/',triggerBody()?['Name']))}/content",
+                                "queries": {
+                                    "inferContentType": true
+                                }
+                            }
+                        },
+                        "Get_encrypted_file": {
+                            "runAfter": {
+                                "Create_Encrypted_file_in_blob_storage": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "ApiConnection",
+                            "inputs": {
+                                "host": {
+                                    "connection": {
+                                        "name": "@parameters('$connections')['azureblob']['connectionId']"
+                                    }
+                                },
+                                "method": "get",
+                                "path": "/datasets/default/files/@{encodeURIComponent(encodeURIComponent(body('Create_Encrypted_file_in_blob_storage')?['Path']))}/content",
+                                "queries": {
+                                    "inferContentType": true
+                                }
+                            }
+                        },
+                        "Initialize_encrypted_content_variable": {
+                            "runAfter": {
+                                "PGPEncrypt": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "blobEncrypted",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "Initialize_new_blob_variable": {
+                            "runAfter": {},
+                            "type": "InitializeVariable",
+                            "inputs": {
+                                "variables": [
+                                    {
+                                        "name": "blobContents",
+                                        "type": "string"
+                                    }
+                                ]
+                            }
+                        },
+                        "PGPEncrypt": {
+                            "runAfter": {
+                                "set_blobcontents_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "Function",
+                            "inputs": {
+                                "body": "@variables('blobContents')",
+                                "function": {
+                                    "id": "[resourceId('Microsoft.Web/sites/functions', 'PepperPOCFunctions', 'PGPEncrypt')]"
+                                },
+                                "method": "POST"
+                            }
+                        },
+                        "Set_encrypted_content_variable": {
+                            "runAfter": {
+                                "Initialize_encrypted_content_variable": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                                "name": "blobEncrypted",
+                                "value": "@{body('PGPEncrypt')}"
+                            }
+                        },
+                        "set_blobcontents_variable": {
+                            "runAfter": {
+                                "Get_blob_content": [
+                                    "Succeeded"
+                                ]
+                            },
+                            "type": "SetVariable",
+                            "inputs": {
+                                "name": "blobContents",
+                                "value": "@{body('Get_blob_content')}"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {
+                    "$connections": {
+                        "value": {
+                            "azureblob": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'azureblob')]",
+                                "connectionName": "azureblob",
+                                "id": "/subscriptions/e90daec2-39dd-429f-8ce6-51283e7737a6/providers/Microsoft.Web/locations/australiaeast/managedApis/azureblob"
+                            },
+                            "sftpwithssh_3": {
+                                "connectionId": "[resourceId('Microsoft.Web/connections', 'sftpwithssh-19')]",
+                                "connectionName": "sftpwithssh-19",
+                                "id": "/subscriptions/e90daec2-39dd-429f-8ce6-51283e7737a6/providers/Microsoft.Web/locations/australiaeast/managedApis/sftpwithssh"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
