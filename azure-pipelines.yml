@@ -21,8 +21,8 @@ stages:
     displayName: 'Build AzureFunctionsPGPEncrypt'
   
     jobs:
-    - job: Build
-      displayName: Build
+    - job: BuildAzureFunctionsPGPEncrypt
+      displayName: 'Build AzureFunctionsPGPEncrypt'
       pool:
         vmImage: $(vmImageName)
   
@@ -47,12 +47,8 @@ stages:
       - publish: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
         artifact: drop
 
-  - stage: BuildPGPEncryptConsoleApp
-    displayName: 'Build PGPEncryptConsoleApp'
-
-    jobs:
-    - job: Build
-      displayName: Build
+    - job: BuildPGPEncryptConsoleApp
+      displayName: 'Build PGPEncryptConsoleApp'
       pool:
         vmImage: $(vmImageName)
 
@@ -76,7 +72,7 @@ stages:
 
       - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
         artifact: drop
-
+        
   - stage: DeployFunctionsToAzure
     displayName: 'Deploy stage'
     dependsOn: Build
