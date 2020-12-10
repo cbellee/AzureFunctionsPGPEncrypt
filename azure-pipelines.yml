@@ -17,7 +17,7 @@ variables:
     vmImageName: 'windows-latest'
 
 stages:
-  - stage: Build
+  - stage: BuildAzureFunctionsPGPEncrypt
     displayName: 'Build AzureFunctionsPGPEncrypt'
   
     jobs:
@@ -47,7 +47,7 @@ stages:
       - publish: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
         artifact: drop
 
-  - stage: Build
+  - stage: BuildPGPEncryptConsoleApp
     displayName: 'Build PGPEncryptConsoleApp'
 
     jobs:
@@ -77,7 +77,7 @@ stages:
       - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
         artifact: drop
 
-  - stage: Deploy
+  - stage: DeployFunctionsToAzure
     displayName: 'Deploy stage'
     dependsOn: Build
     condition: succeeded()
