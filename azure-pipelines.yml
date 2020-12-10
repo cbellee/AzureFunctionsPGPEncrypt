@@ -17,8 +17,8 @@ variables:
     vmImageName: 'windows-latest'
 
 stages:
-  - stage: 'Build AzureFunctionsPGPEncrypt'
-    displayName: Build stage
+  - stage: Build
+    displayName: 'Build AzureFunctionsPGPEncrypt'
   
     jobs:
     - job: Build
@@ -47,8 +47,8 @@ stages:
       - publish: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
         artifact: drop
 
-  - stage: 'Build PGPEncryptConsoleApp'
-    displayName: Build stage
+  - stage: Build
+    displayName: 'Build PGPEncryptConsoleApp'
 
     jobs:
     - job: Build
