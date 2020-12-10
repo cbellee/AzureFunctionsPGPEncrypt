@@ -17,7 +17,7 @@ variables:
     vmImageName: 'windows-latest'
 
 stages:
-  - stage: Build AzureFunctionsPGPEncrypt
+  - stage: 'Build AzureFunctionsPGPEncrypt'
     displayName: Build stage
   
     jobs:
@@ -28,7 +28,7 @@ stages:
   
       steps:
       - task: DotNetCoreCLI@2
-        displayName: Build AzureFunctionsPGPEncrypt
+        displayName: 'Build AzureFunctionsPGPEncrypt'
         inputs:
           command: 'build'
           projects: |
@@ -47,7 +47,7 @@ stages:
       - publish: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
         artifact: drop
 
-  - stage: Build PGPEncryptConsoleApp
+  - stage: 'Build PGPEncryptConsoleApp'
     displayName: Build stage
 
     jobs:
@@ -58,7 +58,7 @@ stages:
 
       steps:
       - task: DotNetCoreCLI@2
-        displayName: Build PGPEncryptConsoleApp
+        displayName: 'Build PGPEncryptConsoleApp'
         inputs:
           command: 'build'
           projects: |
@@ -78,7 +78,7 @@ stages:
         artifact: drop
 
   - stage: Deploy
-    displayName: Deploy stage
+    displayName: 'Deploy stage'
     dependsOn: Build
     condition: succeeded()
   
