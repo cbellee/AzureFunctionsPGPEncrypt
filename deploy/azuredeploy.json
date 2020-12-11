@@ -301,7 +301,7 @@
 			"name": "[variables('containerGroupName2')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"[variables('containerGroupName1')]"
+				//"[variables('containerGroupName1')]"
 				//"[concat(variables('storageAccountName2'), '/default/sftpfileshare')]"
 				//"[resourceId('Microsoft.Storage/storageAccounts/fileservices/shares', variables('storageAccountName1'), 'default', 'sftpfileshare')]"
 			],
