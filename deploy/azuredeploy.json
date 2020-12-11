@@ -6,10 +6,6 @@
 			"type": "string",
 			"defaultValue": "[resourceGroup().location]"
 		},
-		"cliImageName": {
-			"type": "string",
-			"defaultValue": "microsoft/azure-cli:latest"
-		},
 		"sftpImageName": {
 			"type": "string",
 			"defaultValue": "atmoz/sftp:latest"
@@ -17,8 +13,7 @@
 	},
 	"variables": {
 		"suffix": "[substring(uniqueString(subscription().subscriptionid, resourceGroup().id), 0, 6)]",
-		"containerGroupName1": "[concat('create-share-group-', variables('suffix'))]",
-		"containerGroupName2": "[concat('sftp-group-', variables('suffix'))]",
+		"containerGroupName1": "[concat('sftp-group-', variables('suffix'))]",
 		"storageAccountName1": "[concat('stor', 'func', variables('suffix'))]",
 		"storageAccountName2": "[concat('stor', 'sftp', variables('suffix'))]",
 		"aspName": "[concat('asp-', variables('suffix'))]",
@@ -298,7 +293,7 @@
 		{
 			"type": "Microsoft.ContainerInstance/containerGroups",
 			"apiVersion": "2019-12-01",
-			"name": "[variables('containerGroupName2')]",
+			"name": "[variables('containerGroupName1')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
 				//"[variables('containerGroupName1')]"

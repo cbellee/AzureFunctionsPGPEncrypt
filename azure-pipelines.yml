@@ -168,3 +168,31 @@ stages:
                 appType: functionApp
                 appName: $(functionAppName)
                 package: '$(Pipeline.Workspace)/PGPEncryptConsoleApp_drop/PGPEncryptConsoleApp.$(Build.BuildId).zip'
+
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: 'validate logic app template'
+              inputs:
+                action: Create Or Update Resource Group
+                azureResourceManagerConnection: '$(azureSubscription)'
+                csmFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy-logic-app.json
+                csmParametersFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy-logic-app.parameters.json
+                resourceGroupName: $(resourceGroupName)
+                location: $(location)
+                deploymentMode: Validation
+                deploymentScope: Resource Group
+                overrideParameters: -location $(location)
+
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: 'deploy logic app template'
+              inputs:
+                action: Create Or Update Resource Group
+                azureResourceManagerConnection: '$(azureSubscription)'
+                csmFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy-logic-app.json
+                csmParametersFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy-logic-app.parameters.json
+                resourceGroupName: $(resourceGroupName)
+                location: $(location)
+                deploymentMode: Incremental
+                deploymentScope: Resource Group
+                deploymentName: 'deploy-infrastructure'
+                overrideParameters: -location $(location)
+                deploymentOutputs: logicAppDeploymentOutputs
