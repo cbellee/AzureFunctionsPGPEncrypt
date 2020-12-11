@@ -221,11 +221,9 @@
 					"name": "[variables('functionAppName')]",
 					"dependsOn": [
 						"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName1'), 'default')]"
-						//"[variables('storageAccountName1')]"
 					],
 					"properties": {
-						"accessTier": "TransactionOptimized",
-						"shareQuota": 5120,
+						"shareQuota": 100,
 						"enabledProtocols": "SMB"
 					}
 				}
@@ -257,44 +255,14 @@
 					"name": "[variables('sftpFileShareName')]",
 					"dependsOn": [
 						"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName2'), 'default')]"
-						//"[variables('storageAccountName2')]"
 					],
 					"properties": {
-						"accessTier": "TransactionOptimized",
-						"shareQuota": 5120,
+						"shareQuota": 100,
 						"enabledProtocols": "SMB"
 					}
 				}
 			]
 		},
-		/* 		{
-			"type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-			"apiVersion": "2020-08-01-preview",
-			"name": "[concat(variables('storageAccountName1'), '/default/', variables('functionAppName'))]",
-			"dependsOn": [
-				"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName1'), 'default')]",
-				"[variables('storageAccountName1')]"
-			],
-			"properties": {
-				"accessTier": "TransactionOptimized",
-				"shareQuota": 5120,
-				"enabledProtocols": "SMB"
-			}
-		}, */
-		/* 		{
-			"type": "Microsoft.Storage/storageAccounts/fileServices/shares",
-			"apiVersion": "2020-08-01-preview",
-			"name": "[concat(variables('storageAccountName2'), '/default/sftpfileshare')]",
-			"dependsOn": [
-				"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName2'), 'default')]",
-				"[variables('storageAccountName2')]"
-			],
-			"properties": {
-				"accessTier": "TransactionOptimized",
-				"shareQuota": 5120,
-				"enabledProtocols": "SMB"
-			}
-		}, */
 		{
 			"type": "Microsoft.ContainerInstance/containerGroups",
 			"apiVersion": "2019-12-01",
