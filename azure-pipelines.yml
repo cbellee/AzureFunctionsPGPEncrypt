@@ -82,6 +82,13 @@ stages:
       - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
         artifact: PGPEncryptConsoleApp_drop
 
+      - task: CopyFiles@2
+        displayName: Copy files
+        inputs:
+          SourceFolder: '$(Build.SourcesDirectory)/deploy'
+          Contents: '**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+
   - stage: DeployFunctionsToAzure
     displayName: 'Deploy Azure Functions'
     dependsOn: Build
@@ -102,8 +109,8 @@ stages:
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
-                csmFile: deploy/azuredeploy.json
-                csmParametersFile: deploy/azuredeploy.parameters.json
+                csmFile: $(Agent.BuildDirectory)/deploy/azuredeploy.json
+                csmParametersFile: $(Agent.BuildDirectory)/deploy/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
                 location: $(location)
                 deploymentMode: Validation
@@ -115,8 +122,8 @@ stages:
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
-                csmFile: deploy/azuredeploy.json
-                csmParametersFile: deploy/azuredeploy.parameters.json
+                csmFile: $(Agent.BuildDirectory)/deploy/azuredeploy.json
+                csmParametersFile: $(Agent.BuildDirectory)/deploy/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
                 location: $(location)
                 deploymentMode: Incremental
