@@ -117,8 +117,8 @@ stages:
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
-                csmFile: $(Pipeline.Workspace)/azuredeploy.json
-                csmParametersFile: $(Pipeline.Workspace)/azuredeploy.parameters.json
+                csmFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy.json
+                csmParametersFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
                 location: $(location)
                 deploymentMode: Validation
@@ -130,8 +130,8 @@ stages:
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
-                csmFile: $(Pipeline.Workspace)/azuredeploy.json
-                csmParametersFile: $(Pipeline.Workspace)/azuredeploy.parameters.json
+                csmFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy.json
+                csmParametersFile: $(Pipeline.Workspace)/arm_template_drop/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
                 location: $(location)
                 deploymentMode: Incremental
