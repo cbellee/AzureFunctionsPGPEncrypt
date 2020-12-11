@@ -107,8 +107,7 @@ stages:
                 resourceGroupName: $(resourceGroupName)
                 deploymentMode: Validation
                 deploymentScope: Resource Group
-                overrideParameters: |
-                  -location "$(location)"
+                overrideParameters: -location "$(location)"
 
             - task: AzureResourceManagerTemplateDeployment@3
               displayName: 'deploy infrastructure template'
@@ -121,8 +120,7 @@ stages:
                 deploymentMode: Incremental
                 deploymentScope: Resource Group
                 deploymentName: 'deploy-infrastructure'
-                overrideParameters: |
-                  -location "$(location)"
+                overrideParameters: -location "$(location)"
 
             - task: AzureFunctionApp@1
               displayName: 'AzureFunctionsPGPEncrypt deploy to Azure'
