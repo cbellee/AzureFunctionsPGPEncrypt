@@ -516,5 +516,11 @@
 				}
 			}
 		}
-	]
+	],
+	"outputs": {
+		"suffic": {
+			"type": "string",
+			"value": "[variables('suffix')]"
+		}
+	}
 }

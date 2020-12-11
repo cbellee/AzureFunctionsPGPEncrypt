@@ -79,15 +79,21 @@ stages:
           archiveFile: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
           replaceExistingArchive: true
 
-      - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
-        artifact: PGPEncryptConsoleApp_drop
-
       - task: CopyFiles@2
         displayName: Copy files
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)/deploy'
           Contents: '**'
           TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
+
+      - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
+        artifact: PGPEncryptConsoleApp_drop
+
+      - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
+        artifact: PGPEncryptConsoleApp_drop
+
+      - publish: $(Build.ArtifactStagingDirectory)/deploy
+        artifact: arm_template_drop
 
   - stage: DeployFunctionsToAzure
     displayName: 'Deploy Azure Functions'
@@ -130,7 +136,19 @@ stages:
                 deploymentScope: Resource Group
                 deploymentName: 'deploy-infrastructure'
                 overrideParameters: -location $(location)
+                deploymentOutputs: infraDeploymentOutputs
 
+            - task: PowerShell@2
+              displayName: 'Get ARM Deployment Outputs'
+              inputs:
+                targetType: 'inline'
+                script: |
+                  $outputs = '$(infraDeploymentOutputs)' | ConvertFrom-Json
+                  foreach ($output in $outputs.PSObject.Properties) {
+                    Write-Host "$($output.Name) - $($output.Value.value)"
+                    Write-Host "##vso[task.setvariable variable=$($output.Name);]$($output.Value.value)" 
+                  }
+  
             - task: AzureFunctionApp@1
               displayName: 'AzureFunctionsPGPEncrypt deploy to Azure'
               inputs:
