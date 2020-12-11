@@ -105,6 +105,7 @@ stages:
                 csmFile: /deploy/azuredeploy.json
                 csmParametersFile: /deploy/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
+                location: $(location)
                 deploymentMode: Validation
                 deploymentScope: Resource Group
                 overrideParameters: -location $(location)
@@ -117,6 +118,7 @@ stages:
                 csmFile: /deploy/azuredeploy.json
                 csmParametersFile: /deploy/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
+                location: $(location)
                 deploymentMode: Incremental
                 deploymentScope: Resource Group
                 deploymentName: 'deploy-infrastructure'
