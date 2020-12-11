@@ -25,6 +25,8 @@ variables:
     # function App Name
     functionAppName: 'func-tdtwi4'
 
+    configuration: Release
+
 stages:
   - stage: Build
     displayName: Build
@@ -42,7 +44,7 @@ stages:
           command: 'build'
           projects: |
             src/AzureFunctionsPGPEncrypt/*.csproj
-          arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
+          arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration $(configuration)
   
       - task: ArchiveFiles@2
         displayName: 'Archive files'
@@ -68,7 +70,7 @@ stages:
           command: 'build'
           projects: |
             src/PGPEncryptConsoleApp/*.csproj
-          arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration Release
+          arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration $(configuration)
 
       - task: ArchiveFiles@2
         displayName: 'Archive files'
@@ -115,8 +117,8 @@ stages:
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
-                csmFile: $(Agent.BuildDirectory)/deploy/azuredeploy.json
-                csmParametersFile: $(Agent.BuildDirectory)/deploy/azuredeploy.parameters.json
+                csmFile: $(Agent.BuildDirectory)/azuredeploy.json
+                csmParametersFile: $(Agent.BuildDirectory)/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
                 location: $(location)
                 deploymentMode: Validation
@@ -128,8 +130,8 @@ stages:
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
-                csmFile: $(Agent.BuildDirectory)/deploy/azuredeploy.json
-                csmParametersFile: $(Agent.BuildDirectory)/deploy/azuredeploy.parameters.json
+                csmFile: $(Agent.BuildDirectory)/azuredeploy.json
+                csmParametersFile: $(Agent.BuildDirectory)/azuredeploy.parameters.json
                 resourceGroupName: $(resourceGroupName)
                 location: $(location)
                 deploymentMode: Incremental
