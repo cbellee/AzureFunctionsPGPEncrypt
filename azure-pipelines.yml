@@ -14,7 +14,7 @@ variables:
     azureSubscription: 'internal_azure_subscription'
 
     # resource group to target for deployment
-    resourceGroupName: pepper-poc-rg
+    resourceGroupName: 'pepper-poc-rg'
 
     # location
     location: 'australiaeast'
@@ -25,7 +25,7 @@ variables:
     # function App Name
     functionAppName: 'func-tdtwi4'
 
-    configuration: Release
+    configuration: 'Release'
 
 stages:
   - stage: Build
