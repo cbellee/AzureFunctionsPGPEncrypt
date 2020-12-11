@@ -45,7 +45,7 @@ stages:
           replaceExistingArchive: true
   
       - publish: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
-        artifact: drop
+        artifact: AzureFunctionsPGPEncrypt_drop
 
     - job: BuildPGPEncryptConsoleApp
       displayName: 'Build PGPEncryptConsoleApp'
@@ -71,10 +71,10 @@ stages:
           replaceExistingArchive: true
 
       - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
-        artifact: drop
-        
+        artifact: PGPEncryptConsoleApp_drop
+
   - stage: DeployFunctionsToAzure
-    displayName: 'Deploy stage'
+    displayName: 'Deploy Azure Functions'
     dependsOn: Build
     condition: succeeded()
   
