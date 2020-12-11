@@ -15,6 +15,9 @@ variables:
     # resource group to target for deployment
     resourceGroupName: pepper-poc-rg
 
+    # location
+    location: 'australiaeast'
+
     # Agent VM image name
     vmImageName: 'windows-latest'
 
@@ -93,6 +96,33 @@ stages:
         runOnce:
           deploy:
             steps:
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: 'validate infrastructure template'
+              inputs:
+                action: Create Or Update Resource Group
+                azureResourceManagerConnection: '$(azureSubscription)'
+                csmFile: /deploy/azuredeploy.json
+                csmParametersFile: /deploy/azuredeploy.parameters.json
+                resourceGroupName: $(resourceGroupName)
+                deploymentMode: Validation
+                deploymentScope: Resource Group
+                overrideParameters: |
+                  -location "$(location)"
+
+            - task: AzureResourceManagerTemplateDeployment@3
+              displayName: 'deploy infrastructure template'
+              inputs:
+                action: Create Or Update Resource Group
+                azureResourceManagerConnection: '$(azureSubscription)'
+                csmFile: /deploy/azuredeploy.json
+                csmParametersFile: /deploy/azuredeploy.parameters.json
+                resourceGroupName: $(resourceGroupName)
+                deploymentMode: Incremental
+                deploymentScope: Resource Group
+                deploymentName: 'deploy-infrastructure'
+                overrideParameters: |
+                  -location "$(location)"
+
             - task: AzureFunctionApp@1
               displayName: 'AzureFunctionsPGPEncrypt deploy to Azure'
               inputs:
