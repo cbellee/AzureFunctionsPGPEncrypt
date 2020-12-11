@@ -18,9 +18,12 @@ variables:
     # Agent VM image name
     vmImageName: 'windows-latest'
 
+    # function App Name
+    functionAppName: 'func-tdtwi4'
+
 stages:
   - stage: Build
-    displayName: 'Build AzureFunctionsPGPEncrypt'
+    displayName: Build
   
     jobs:
     - job: BuildAzureFunctionsPGPEncrypt
@@ -96,8 +99,8 @@ stages:
                 azureSubscription: '$(azureSubscription)'
                 resourceGroupName: $(resourceGroupName)
                 appType: functionApp
-                appName: AzureFunctionsPGPEncrypt
-                package: '$(Pipeline.Workspace)/drop/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip'
+                appName: $(functionAppName)
+                package: '$(Pipeline.Workspace)/AzureFunctionsPGPEncrypt_drop/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip'
 
             - task: AzureFunctionApp@1
               displayName: 'PGPEncryptConsoleApp deploy to Azure'
@@ -105,5 +108,5 @@ stages:
                 azureSubscription: '$(azureSubscription)'
                 resourceGroupName: $(resourceGroupName)
                 appType: functionApp
-                appName: PGPEncryptConsoleApp
-                package: '$(Pipeline.Workspace)/drop/PGPEncryptConsoleApp.$(Build.BuildId).zip'
+                appName: $(functionAppName)
+                package: '$(Pipeline.Workspace)/PGPEncryptConsoleApp_drop/PGPEncryptConsoleApp.$(Build.BuildId).zip'
