@@ -219,10 +219,10 @@
 					"type": "shares",
 					"apiVersion": "2019-06-01",
 					"name": "[variables('functionAppName')]",
-					/* 					"dependsOn": [
-						//"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName1'), 'default')]",
-						"[variables('storageAccountName1')]"
-					], */
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName1'), 'default')]"
+						//"[variables('storageAccountName1')]"
+					],
 					"properties": {
 						"accessTier": "TransactionOptimized",
 						"shareQuota": 5120,
@@ -255,10 +255,10 @@
 					"type": "shares",
 					"apiVersion": "2019-06-01",
 					"name": "[variables('sftpFileShareName')]",
-					/* 					"dependsOn": [
-						//"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName2'), 'default')]",
-						"[variables('storageAccountName2')]"
-					], */
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts/fileServices', variables('storageAccountName2'), 'default')]"
+						//"[variables('storageAccountName2')]"
+					],
 					"properties": {
 						"accessTier": "TransactionOptimized",
 						"shareQuota": 5120,
