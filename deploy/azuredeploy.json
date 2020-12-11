@@ -206,7 +206,6 @@
 				"tier": "Standard"
 			},
 			"properties": {
-				"protocolSettings": {}
 			},
 			"resources": [
 				{
@@ -235,7 +234,6 @@
 				"tier": "Standard"
 			},
 			"properties": {
-				"protocolSettings": {}
 			},
 			"resources": [
 				{
@@ -252,7 +250,7 @@
 				}
 			]
 		},
-		{
+/* 		{
 			"type": "Microsoft.ContainerInstance/containerGroups",
 			"apiVersion": "2019-12-01",
 			"name": "[variables('containerGroupName1')]",
@@ -296,7 +294,7 @@
 				"restartPolicy": "OnFailure",
 				"osType": "Linux"
 			}
-		},
+		}, */
 		{
 			"type": "Microsoft.ContainerInstance/containerGroups",
 			"apiVersion": "2019-12-01",
