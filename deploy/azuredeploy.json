@@ -206,13 +206,7 @@
 				"tier": "Standard"
 			},
 			"properties": {
-				"protocolSettings": {
-					"smb": {
-					}
-				},
-				"cors": {
-					"corsRules": []
-				}
+				"protocolSettings": {}
 			},
 			"resources": [
 				{
@@ -241,12 +235,7 @@
 				"tier": "Standard"
 			},
 			"properties": {
-				"protocolSettings": {
-					"smb": {}
-				},
-				"cors": {
-					"corsRules": []
-				}
+				"protocolSettings": {}
 			},
 			"resources": [
 				{
