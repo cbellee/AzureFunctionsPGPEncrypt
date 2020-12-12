@@ -144,6 +144,8 @@ stages:
       environment: 'development'
       dependsOn: DeployInfrastructure
       condition: succeeded()
+      variables:
+        functionAppName: $[ dependencies.DeployInfrastructure.outputs['DeployInfrastructure.getArmOutputs.functionAppName'] ]
       pool:
         vmImage: $(vmImageName)
       strategy:
@@ -157,7 +159,7 @@ stages:
                 azureSubscription: '$(azureSubscription)'
                 resourceGroupName: $(resourceGroupName)
                 appType: functionApp
-                appName: $[ dependencies.DeployInfrastructure.outputs['DeployInfrastructure.getArmOutputs.functionAppName'] ] #$(functionAppName)
+                appName: $(functionAppName)
                 deploymentMethod: zipDeploy
                 package: '$(Pipeline.Workspace)/functionApp_drop/functionApp.$(Build.BuildId).zip'
 
