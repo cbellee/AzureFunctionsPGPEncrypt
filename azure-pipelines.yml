@@ -32,18 +32,18 @@ stages:
     displayName: Build
   
     jobs:
-    - job: BuildAzureFunctionsPGPEncrypt
-      displayName: 'Build AzureFunctionsPGPEncrypt'
+    - job: BuildFunctionAppJob
+      displayName: 'Build PGPEncrypt Job'
       pool:
         vmImage: $(vmImageName)
   
       steps:
       - task: DotNetCoreCLI@2
-        displayName: 'Build AzureFunctionsPGPEncrypt'
+        displayName: 'Build function App'
         inputs:
           command: 'build'
           projects: |
-            src/AzureFunctionsPGPEncrypt/*.csproj
+            src/functionApp/*.csproj
           arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration $(configuration)
   
       - task: ArchiveFiles@2
@@ -52,47 +52,44 @@ stages:
           rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
           includeRootFolder: false
           archiveType: zip
-          archiveFile: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
+          archiveFile: $(Build.ArtifactStagingDirectory)/functionApp.$(Build.BuildId).zip
           replaceExistingArchive: true
   
-      - publish: $(Build.ArtifactStagingDirectory)/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip
-        artifact: AzureFunctionsPGPEncrypt_drop
+      - publish: $(Build.ArtifactStagingDirectory)/functionApp.$(Build.BuildId).zip
+        artifact: functionApp_drop
 
-    - job: BuildPGPEncryptConsoleApp
-      displayName: 'Build PGPEncryptConsoleApp'
+    - job: BuildConsoleAppJob
+      displayName: 'Build Console App Job'
       pool:
         vmImage: $(vmImageName)
 
       steps:
       - task: DotNetCoreCLI@2
-        displayName: 'Build PGPEncryptConsoleApp'
+        displayName: 'Build Console App Task Step'
         inputs:
           command: 'build'
           projects: |
-            src/PGPEncryptConsoleApp/*.csproj
+            src/consoleApp/*.csproj
           arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration $(configuration)
+      
+      - publish: $(Build.ArtifactStagingDirectory)/consoleApp.$(Build.BuildId).zip
+        artifact: PGPEncryptConsoleApp_drop
 
       - task: ArchiveFiles@2
-        displayName: 'Archive files'
+        displayName: 'Archive files Task Step'
         inputs:
           rootFolderOrFile: '$(System.DefaultWorkingDirectory)/publish_output'
           includeRootFolder: false
           archiveType: zip
-          archiveFile: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
+          archiveFile: $(Build.ArtifactStagingDirectory)/consoleApp.$(Build.BuildId).zip
           replaceExistingArchive: true
 
       - task: CopyFiles@2
-        displayName: Copy files
+        displayName: 'Copy Files Task Step'
         inputs:
           SourceFolder: '$(Build.SourcesDirectory)/deploy'
           Contents: '**'
           TargetFolder: '$(Build.ArtifactStagingDirectory)/deploy'
-
-      - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
-        artifact: PGPEncryptConsoleApp_drop
-
-      - publish: $(Build.ArtifactStagingDirectory)/PGPEncryptConsoleApp.$(Build.BuildId).zip
-        artifact: PGPEncryptConsoleApp_drop
 
       - publish: $(Build.ArtifactStagingDirectory)/deploy
         artifact: arm_template_drop
@@ -152,22 +149,14 @@ stages:
                   }
   
             - task: AzureFunctionApp@1
-              displayName: 'AzureFunctionsPGPEncrypt deploy to Azure'
+              displayName: 'Function App deployment'
               inputs:
                 azureSubscription: '$(azureSubscription)'
                 resourceGroupName: $(resourceGroupName)
                 appType: functionApp
                 appName: $(functionAppName)
-                package: '$(Pipeline.Workspace)/AzureFunctionsPGPEncrypt_drop/AzureFunctionsPGPEncrypt.$(Build.BuildId).zip'
-
-            - task: AzureFunctionApp@1
-              displayName: 'PGPEncryptConsoleApp deploy to Azure'
-              inputs:
-                azureSubscription: '$(azureSubscription)'
-                resourceGroupName: $(resourceGroupName)
-                appType: functionApp
-                appName: $(functionAppName)
-                package: '$(Pipeline.Workspace)/PGPEncryptConsoleApp_drop/PGPEncryptConsoleApp.$(Build.BuildId).zip'
+                deploymentMethod: zipDeploy
+                package: '$(Pipeline.Workspace)/functionApp_drop/functionApp.$(Build.BuildId).zip'
 
             - task: AzureResourceManagerTemplateDeployment@3
               displayName: 'validate logic app template'
