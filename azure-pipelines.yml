@@ -33,13 +33,13 @@ stages:
   
     jobs:
     - job: BuildFunctionAppJob
-      displayName: 'Build PGPEncrypt Job'
+      displayName: 'Build Function App Job'
       pool:
         vmImage: $(vmImageName)
   
       steps:
       - task: DotNetCoreCLI@2
-        displayName: 'Build function App'
+        displayName: 'Build function App Task Step'
         inputs:
           command: 'build'
           projects: |
@@ -72,9 +72,6 @@ stages:
             src/consoleApp/*.csproj
           arguments: --output $(System.DefaultWorkingDirectory)/publish_output --configuration $(configuration)
       
-      - publish: $(Build.ArtifactStagingDirectory)/consoleApp.$(Build.BuildId).zip
-        artifact: PGPEncryptConsoleApp_drop
-
       - task: ArchiveFiles@2
         displayName: 'Archive files Task Step'
         inputs:
@@ -83,6 +80,11 @@ stages:
           archiveType: zip
           archiveFile: $(Build.ArtifactStagingDirectory)/consoleApp.$(Build.BuildId).zip
           replaceExistingArchive: true
+
+      - publish: $(Build.ArtifactStagingDirectory)/consoleApp.$(Build.BuildId).zip
+        artifact: consoleApp_drop
+
+
 
       - task: CopyFiles@2
         displayName: 'Copy Files Task Step'
