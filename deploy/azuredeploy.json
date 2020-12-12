@@ -427,7 +427,10 @@
 			"kind": "V1",
 			"properties": {
 				"displayName": "[concat('storage-cxn-', variables('suffix'))]",
-				"customParameterValues": {},
+				"connectionParameters": {
+					"accessKey": "[listKeys(variables('storageAccountName2'), '2019-06-01').keys[0].value]",
+					"accountName": "[variables('storageAccountName2')]"
+				},
 				"api": {
 					"id": "[concat('/subscriptions/', subscription().subscriptionid, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/', 'azureblob')]"
 				}
@@ -440,8 +443,18 @@
 			"location": "[parameters('location')]",
 			"kind": "V1",
 			"properties": {
-				"displayName": "FTP-Monday",
-				"customParameterValues": {},
+				"displayName": "SFTP",
+				"connectionParameters": {
+					"acceptAnySshHostKey": false,
+					"hostName": "",
+					"userName": "",
+					"password": "",
+					"portNumber": 22,
+					"rootFolder": "/",
+					"sshHostKeyFingerPrint": "[parameters('sshHostKeyFingerprint')]",
+					"sshPrivateKey": "[parameters('sshPrivateKey')]",
+					"sshPrivateKeyPassphrase": "[parameters('sftpPassphrase')]"
+				},
 				"api": {
 					"id": "[concat('/subscriptions/', subscription().subscriptionid, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/', 'sftpwithssh')]"
 				}
