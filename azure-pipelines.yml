@@ -129,12 +129,13 @@ stages:
 
             - task: PowerShell@2
               displayName: 'Get ARM Deployment Outputs'
+              name: getArmOutputs
               inputs:
                 targetType: 'inline'
                 script: |
                   $outputs = '$(infraDeploymentOutputs)' | ConvertFrom-Json
                   foreach ($output in $outputs.PSObject.Properties) {
-                    Write-Host "$($output.Name) = $($output.Value.value)"
+                    Write-Host "$($output.Name): $($output.Value.value)"
                     Write-Host "##vso[task.setvariable variable=$($output.Name);isOutput=true;]$($output.Value.value)" 
                   }
 
@@ -156,7 +157,7 @@ stages:
                 azureSubscription: '$(azureSubscription)'
                 resourceGroupName: $(resourceGroupName)
                 appType: functionApp
-                appName: $[ dependencies.DeployInfrastructure.outputs['functionAppName'] ] #$(functionAppName)
+                appName: $[ dependencies.DeployInfrastructure.outputs['DeployInfrastructure.getArmOutputs.functionAppName'] ] #$(functionAppName)
                 deploymentMethod: zipDeploy
                 package: '$(Pipeline.Workspace)/functionApp_drop/functionApp.$(Build.BuildId).zip'
 
