@@ -322,21 +322,6 @@
 				]
 			}
 		},
-		/* 		{
-			"type": "Microsoft.Web/serverfarms",
-			"apiVersion": "2018-02-01",
-			"name": "[variables('aspName')]",
-			"location": "[parameters('location')]",
-			"sku": {
-				"name": "Y1",
-				//"tier": "Dynamic",
-				"size": "Y1",
-				"family": "Y",
-				"capacity": 0
-			},
-			"properties": {
-			}
-		}, */
 		{
 			"type": "Microsoft.Web/serverfarms",
 			"apiVersion": "2018-02-01",
@@ -349,10 +334,7 @@
 				"family": "Y",
 				"capacity": 0
 			},
-			"kind": "functionapp",
 			"properties": {
-				"name": "[variables('aspName')]",
-				"reserved": true
 			}
 		},
 		{
@@ -376,7 +358,7 @@
 			"dependsOn": [
 				"[variables('aspName')]"
 			],
-			"kind": "functionapp,linux",
+			"kind": "functionapp",
 			"properties": {
 				"enabled": true,
 				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('aspName'))]",
