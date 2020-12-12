@@ -100,7 +100,7 @@ stages:
           deploy:
             steps:
             - task: AzureResourceManagerTemplateDeployment@3
-              displayName: 'validate infrastructure template'
+              displayName: 'Validate infrastructure template'
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
@@ -113,7 +113,7 @@ stages:
                 overrideParameters: -location $(location) -pgpPassPhrase $(pgpPassPhrase) -pgpPublicKey $(pgpPublicKey) -pgpPrivateKey $(pgpPrivateKey)
 
             - task: AzureResourceManagerTemplateDeployment@3
-              displayName: 'deploy infrastructure template'
+              displayName: 'Deploy infrastructure template'
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
@@ -134,7 +134,7 @@ stages:
                 script: |
                   $outputs = '$(infraDeploymentOutputs)' | ConvertFrom-Json
                   foreach ($output in $outputs.PSObject.Properties) {
-                    Write-Host "$($output.Name) - $($output.Value.value)"
+                    Write-Host "$($output.Name) = $($output.Value.value)"
                     Write-Host "##vso[task.setvariable variable=$($output.Name);isOutput=true;]$($output.Value.value)" 
                   }
 
@@ -156,12 +156,12 @@ stages:
                 azureSubscription: '$(azureSubscription)'
                 resourceGroupName: $(resourceGroupName)
                 appType: functionApp
-                appName: $[ dependencies.DeployFunctions.outputs['functionAppName'] ] #$(functionAppName)
+                appName: $[ dependencies.DeployInfrastructure.outputs['functionAppName'] ] #$(functionAppName)
                 deploymentMethod: zipDeploy
                 package: '$(Pipeline.Workspace)/functionApp_drop/functionApp.$(Build.BuildId).zip'
 
             - task: AzureResourceManagerTemplateDeployment@3
-              displayName: 'validate logic app template'
+              displayName: 'Validate logic app template'
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
@@ -174,7 +174,7 @@ stages:
                 overrideParameters: -location $(location)
 
             - task: AzureResourceManagerTemplateDeployment@3
-              displayName: 'deploy logic app template'
+              displayName: 'Deploy logic app template'
               inputs:
                 action: Create Or Update Resource Group
                 azureResourceManagerConnection: '$(azureSubscription)'
