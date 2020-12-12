@@ -427,7 +427,7 @@
 			"kind": "V1",
 			"properties": {
 				"displayName": "[concat('storage-cxn-', variables('suffix'))]",
-				"connectionParameters": {
+				"parameterValues": {
 					"accessKey": "[listKeys(variables('storageAccountName2'), '2019-06-01').keys[0].value]",
 					"accountName": "[variables('storageAccountName2')]"
 				},
@@ -444,16 +444,16 @@
 			"kind": "V1",
 			"properties": {
 				"displayName": "SFTP",
-				"connectionParameters": {
+				"parameterValues": {
 					"acceptAnySshHostKey": false,
 					"hostName": "",
 					"userName": "",
 					"password": "",
 					"portNumber": 22,
 					"rootFolder": "/",
-					"sshHostKeyFingerPrint": "[parameters('sshHostKeyFingerprint')]",
-					"sshPrivateKey": "[parameters('sshPrivateKey')]",
-					"sshPrivateKeyPassphrase": "[parameters('sftpPassphrase')]"
+					"sshHostKeyFingerPrint": "[parameters('pgpPublicKey')]",
+					"sshPrivateKey": "[parameters('pgpPrivateKey')]",
+					"sshPrivateKeyPassphrase": "[parameters('pgpPassphrase')]"
 				},
 				"api": {
 					"id": "[concat('/subscriptions/', subscription().subscriptionid, '/providers/Microsoft.Web/locations/', parameters('location'), '/managedApis/', 'sftpwithssh')]"
