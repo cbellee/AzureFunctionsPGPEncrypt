@@ -9,6 +9,15 @@
 		"sftpImageName": {
 			"type": "string",
 			"defaultValue": "atmoz/sftp:latest"
+		},
+		"pgpPassPhrase": {
+			"type": "string"
+		},
+		"pgpPublicKey": {
+			"type": "string"
+		},
+		"pgpPrivateKey": {
+			"type": "string"
 		}
 	},
 	"variables": {
@@ -179,7 +188,7 @@
 		{
 			"type": "Microsoft.Storage/storageAccounts/blobServices/containers",
 			"apiVersion": "2020-08-01-preview",
-			"name": "[concat(variables('storageAccountName1'), '/default/sousrce')]",
+			"name": "[concat(variables('storageAccountName1'), '/default/source')]",
 			"dependsOn": [
 				"[resourceId('Microsoft.Storage/storageAccounts/blobServices', variables('storageAccountName1'), 'default')]"
 			],
@@ -245,60 +254,13 @@
 				}
 			]
 		},
-/* 		{
-			"type": "Microsoft.ContainerInstance/containerGroups",
-			"apiVersion": "2019-12-01",
-			"name": "[variables('containerGroupName1')]",
-			"location": "[parameters('location')]",
-			"properties": {
-				"sku": "Standard",
-				"containers": [
-					{
-						"name": "azclicontainer",
-						"properties": {
-							"image": "[parameters('cliImageName')]",
-							"command": [
-								"az",
-								"storage",
-								"share",
-								"create",
-								"--name",
-								"[variables('sftpFileShareName')]"
-							],
-							"ports": [],
-							"environmentVariables": [
-								{
-									"name": "AZURE_STORAGE_ACCOUNT",
-									"value": "[variables('storageAccountName2')]"
-								},
-								{
-									"name": "AZURE_STORAGE_KEY",
-									"value": "[listKeys(variables('storageAccountName2'), '2019-06-01').keys[0].value]"
-								}
-							],
-							"resources": {
-								"requests": {
-									"memoryInGB": 1,
-									"cpu": 1
-								}
-							}
-						}
-					}
-				],
-				"initContainers": [],
-				"restartPolicy": "OnFailure",
-				"osType": "Linux"
-			}
-		}, */
 		{
 			"type": "Microsoft.ContainerInstance/containerGroups",
 			"apiVersion": "2019-12-01",
 			"name": "[variables('containerGroupName1')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				//"[variables('containerGroupName1')]"
-				//"[concat(variables('storageAccountName2'), '/default/sftpfileshare')]"
-				//"[resourceId('Microsoft.Storage/storageAccounts/fileservices/shares', variables('storageAccountName1'), 'default', 'sftpfileshare')]"
+				"[variables('storageAccountName2')]"
 			],
 			"properties": {
 				"sku": "Standard",
@@ -430,6 +392,18 @@
 						{
 							"name": "FUNCTIONS_WORKER_RUNTIME",
 							"value": "[variables('functionWorkerRuntime')]"
+						},
+						{
+							"name": "pgp-passphrase",
+							"value": "[parameters('pgpPassPhrase')]"
+						},
+						{
+							"name": "pgp-private-key",
+							"value": "[parameters('pgpPrivateKey')]"
+						},
+						{
+							"name": "pgp-public-key",
+							"value": "[parameters('pgpPublicKey')]"
 						}
 					]
 				}
@@ -502,9 +476,9 @@
 		}
 	],
 	"outputs": {
-		"suffic": {
+		"functionAppName": {
 			"type": "string",
-			"value": "[variables('suffix')]"
+			"value": "[variables('functionAppName')]"
 		}
 	}
 }
