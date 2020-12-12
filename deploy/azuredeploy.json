@@ -260,8 +260,7 @@
 			"name": "[variables('containerGroupName1')]",
 			"location": "[parameters('location')]",
 			"dependsOn": [
-				"[variables('storageAccountName2')]",
-				"[concat(variables('storageAccountName2'), '/default')]"
+				"[resourceId('Microsoft.Storage/storageAccounts/fileServices/shares', variables('storageAccountName2'), 'default', variables('sftpFileShareName'))]"
 			],
 			"properties": {
 				"sku": "Standard",
