@@ -13,7 +13,7 @@ namespace AzureFunctionsPGPEncrypt
 {
     public static class PGPEncrypt
     {
-        private const string PublicKeyEnvironmentVariable = "pgp-public-key";
+        private const string PublicKeyEnvironmentVariable = "PGP_PUBLIC_KEY";
 
         [FunctionName(nameof(PGPEncrypt))]
         public static async Task<IActionResult> RunAsync(

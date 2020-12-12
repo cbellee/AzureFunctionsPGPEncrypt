@@ -411,15 +411,15 @@
 							"value": "[variables('functionWorkerRuntime')]"
 						},
 						{
-							"name": "pgp-passphrase",
+							"name": "PGP_PASS_PHRASE",
 							"value": "[parameters('pgpPassPhrase')]"
 						},
 						{
-							"name": "pgp-private-key",
+							"name": "PGP_PRIVATE_KEY",
 							"value": "[parameters('pgpPrivateKey')]"
 						},
 						{
-							"name": "pgp-public-key",
+							"name": "PGP_PUBLIC_KEY",
 							"value": "[parameters('pgpPublicKey')]"
 						}
 					]

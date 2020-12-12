@@ -13,8 +13,8 @@ namespace AzureFunctionsPGPDecrypt
 {
     public static class PGPDecrypt
     {
-        private const string PrivateKeyEnvironmentVariable = "pgp-private-key";
-        private const string PassPhraseEnvironmentVariable = "pgp-passphrase";
+        private const string PrivateKeyEnvironmentVariable = "PGP_PRIVATE_KEY";
+        private const string PassPhraseEnvironmentVariable = "PGP_PASS_PHRASE";
 
         [FunctionName(nameof(PGPDecrypt))]
         public static async Task<IActionResult> RunAsync(
