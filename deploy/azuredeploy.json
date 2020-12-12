@@ -334,7 +334,7 @@
 				"family": "Y",
 				"capacity": 0
 			},
-			"kind": "functionapp",
+			"kind": "functionapp,linux",
 			"properties": {
 			}
 		},
@@ -359,7 +359,7 @@
 			"dependsOn": [
 				"[variables('aspName')]"
 			],
-			"kind": "functionapp",
+			"kind": "functionapp,linux",
 			"properties": {
 				"enabled": true,
 				"serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('aspName'))]",
@@ -420,32 +420,6 @@
 			"properties": {
 			}
 		},
-		/* {
-			"type": "Microsoft.Web/sites/functions",
-			"apiVersion": "2018-11-01",
-			"name": "[concat(variables('functionAppName'), '/PGPEncrypt')]",
-			"location": "[parameters('location')]",
-			"dependsOn": [
-				"[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
-			],
-			"properties": {
-				"config": {},
-				"test_data": ""
-			}
-		},
-		{
-			"type": "Microsoft.Web/sites/functions",
-			"apiVersion": "2018-11-01",
-			"name": "[concat(variables('functionAppName'), '/PGPDecrypt')]",
-			"location": "[parameters('location')]",
-			"dependsOn": [
-				"[resourceId('Microsoft.Web/sites', variables('functionAppName'))]"
-			],
-			"properties": {
-				"config": {},
-				"test_data": ""
-			}
-		}, */
 		{
 			"type": "Microsoft.Web/connections",
 			"apiVersion": "2016-06-01",

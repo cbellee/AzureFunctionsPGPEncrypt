@@ -11,7 +11,7 @@ trigger:
   
 variables:
     azureSubscription: 'internal_azure_subscription'
-    resourceGroupName: 'pepper-poc-rg'
+    resourceGroupName: 'stfp-rg'
     location: 'australiaeast'
     vmImageName: 'windows-latest'
     configuration: 'Release'
