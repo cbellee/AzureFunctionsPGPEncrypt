@@ -329,12 +329,11 @@
 			"location": "[parameters('location')]",
 			"sku": {
 				"name": "Y1",
-				"tier": "Dynamic",
+				//"tier": "Dynamic",
 				"size": "Y1",
 				"family": "Y",
 				"capacity": 0
 			},
-			"kind": "functionapp,linux",
 			"properties": {
 			}
 		},
